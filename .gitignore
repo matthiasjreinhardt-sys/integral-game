@@ -1,0 +1,6 @@
+# Nur lokal / manuell in die Firebase Console einfuegen, nicht im Repo.
+firestore.rules
+
+# Falls jemals per Node-Skript verwendet: echtes Geheimnis, nie committen.
+scripts/serviceAccountKey.json
+scripts/accounts.csv
