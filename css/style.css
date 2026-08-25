@@ -106,6 +106,44 @@ main#app {
   margin-top: 16px;
 }
 
+/* ---- Nickname / Highscore ---- */
+
+.nickname-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.nickname-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.nickname-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.nickname-form input {
+  font: inherit;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.highscore-me {
+  background: rgba(59, 130, 246, 0.15);
+}
+
 /* ---- Start screen / module cards ---- */
 
 .module-grid {

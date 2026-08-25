@@ -13,6 +13,8 @@ Game.state = {
   answered: false,
   sessionCorrect: 0,
   sessionTotal: 0,
+  nickname: "",
+  course: null,
 };
 
 const appEl = document.getElementById("app");
@@ -40,9 +42,10 @@ function renderScoreboard() {
     scoreboardEl.innerHTML = "";
     return;
   }
-  const { sessionCorrect, sessionTotal } = Game.state;
+  const { sessionCorrect, sessionTotal, nickname } = Game.state;
+  const displayName = nickname || user.email.split("@")[0];
   scoreboardEl.innerHTML = `
-    <span>${user.email.split("@")[0]}</span>
+    <span>${displayName}</span>
     ${sessionTotal > 0 ? `<span>Punkte: <b>${sessionCorrect}/${sessionTotal}</b></span>` : ""}
     <button class="secondary" id="logout-btn">Abmelden</button>
   `;
@@ -87,6 +90,26 @@ function renderLogin() {
 function renderStart() {
   const modules = Object.values(Game.modules);
   appEl.innerHTML = `
+    <div class="nickname-row">
+      <form id="nickname-form" class="nickname-form">
+        <label>Anzeigename für die Bestenliste
+          <input type="text" id="nickname-input" maxlength="20" placeholder="z.B. MathePanda" value="${Game.state.nickname || ""}" />
+        </label>
+        <button type="submit" class="secondary">Speichern</button>
+      </form>
+    </div>
+
+    ${
+      Game.state.course
+        ? `
+    <div class="admin-panel highscore-panel">
+      <h2>🏆 Bestenliste: ${Game.state.course}</h2>
+      <p>Top 5 nach Anzahl richtiger Antworten.</p>
+      <div id="highscore-container"><p>Lade…</p></div>
+    </div>`
+        : ""
+    }
+
     <h2>Modul wählen</h2>
     <div class="module-grid">
       ${modules
@@ -108,6 +131,60 @@ function renderStart() {
       render();
     });
   });
+
+  const nicknameForm = document.getElementById("nickname-form");
+  nicknameForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const nickname = document.getElementById("nickname-input").value.trim();
+    const btn = nicknameForm.querySelector("button");
+    btn.disabled = true;
+    Game.Scores.setNickname(Game.Auth.currentUser.uid, nickname)
+      .then(() => {
+        Game.state.nickname = nickname;
+        renderScoreboard();
+        btn.textContent = "Gespeichert ✓";
+      })
+      .catch(() => {
+        btn.textContent = "Fehler, nochmal versuchen";
+      })
+      .finally(() => {
+        btn.disabled = false;
+      });
+  });
+
+  if (Game.state.course) loadHighscore();
+}
+
+async function loadHighscore() {
+  const container = document.getElementById("highscore-container");
+  try {
+    const top = await Game.Scores.listTopByCourse(Game.state.course, 5);
+    const myUid = Game.Auth.currentUser.uid;
+    container.innerHTML = top.length
+      ? `
+      <div class="table-scroll">
+        <table class="admin-table">
+          <thead>
+            <tr><th>Platz</th><th>Name</th><th>Richtige Antworten</th></tr>
+          </thead>
+          <tbody>
+            ${top
+              .map(
+                (r, i) => `
+              <tr class="${r.uid === myUid ? "highscore-me" : ""}">
+                <td>${i + 1}</td>
+                <td>${r.nickname || r.username || "unbekannt"}</td>
+                <td>${r.correct || 0}</td>
+              </tr>`
+              )
+              .join("")}
+          </tbody>
+        </table>
+      </div>`
+      : "<p>Noch keine Ergebnisse in diesem Kurs.</p>";
+  } catch (err) {
+    container.innerHTML = `<div class="feedback wrong show">Bestenliste konnte nicht geladen werden: ${err.message}</div>`;
+  }
 }
 
 function renderLevels() {
@@ -340,6 +417,11 @@ Game.Auth.onReady(async (user) => {
     }
     Game.state.sessionCorrect = agg.correct;
     Game.state.sessionTotal = agg.total;
+    Game.state.nickname = agg.nickname;
+    Game.state.course = agg.course;
+    if (!agg.username) {
+      Game.Scores.ensureUsername(user.uid, user.email.split("@")[0]).catch(() => {});
+    }
   } catch (err) {
     console.error("Punktestand konnte nicht geladen werden", err);
   }

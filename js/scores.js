@@ -12,7 +12,39 @@ Game.Scores = {
       correct: (data && data.correct) || 0,
       total: (data && data.total) || 0,
       disabled: !!(data && data.disabled),
+      nickname: (data && data.nickname) || "",
+      course: (data && data.course) || null,
+      username: (data && data.username) || "",
     };
+  },
+
+  setNickname(uid, nickname) {
+    return firebase.firestore().collection("scores").doc(uid).set({ nickname }, { merge: true });
+  },
+
+  // Traegt den Benutzernamen nach, falls er im Dokument fehlt (z.B. bei
+  // Konten, die per Hand in der Firebase Console angelegt wurden statt
+  // ueber das Admin-Panel).
+  ensureUsername(uid, username) {
+    return firebase.firestore().collection("scores").doc(uid).set({ username }, { merge: true });
+  },
+
+  setCourse(uid, course) {
+    return firebase.firestore().collection("scores").doc(uid).set({ course }, { merge: true });
+  },
+
+  // Top-Platzierungen eines Kurses nach Anzahl richtiger Antworten.
+  // Benoetigt einen Firestore-Composite-Index: scores, Felder "course" (Aufsteigend)
+  // + "correct" (Absteigend) - Firebase Console -> Firestore -> Indizes.
+  async listTopByCourse(course, limitCount = 5) {
+    const snapshot = await firebase
+      .firestore()
+      .collection("scores")
+      .where("course", "==", course)
+      .orderBy("correct", "desc")
+      .limit(limitCount)
+      .get();
+    return snapshot.docs.map((doc) => ({ uid: doc.id, ...doc.data() }));
   },
 
   async listAll() {

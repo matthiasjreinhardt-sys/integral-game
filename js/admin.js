@@ -159,6 +159,7 @@ function renderRosterTable() {
             <tr>
               <th>Kurs</th>
               <th>Benutzername</th>
+              <th>Nickname</th>
               <th>Richtig/Gesamt</th>
               <th>Quote</th>
               <th>Status</th>
@@ -170,8 +171,9 @@ function renderRosterTable() {
               .map(
                 (r) => `
               <tr>
-                <td>${r.course || "–"}</td>
-                <td>${r.username || r.uid}</td>
+                <td>${r.course || "–"} <button class="secondary small" data-edit-course="${r.uid}" data-current="${r.course || ""}">✏️</button></td>
+                <td>${r.username || "unbekannt"}</td>
+                <td>${r.nickname || "–"}</td>
                 <td>${r.correct || 0}/${r.total || 0}</td>
                 <td>${r.total ? Math.round((r.correct / r.total) * 100) + "%" : "–"}</td>
                 <td>${
@@ -184,11 +186,11 @@ function renderRosterTable() {
                     ${r.disabled ? "Aktivieren" : "Deaktivieren"}
                   </button>
                   <button class="secondary small" data-history="${r.uid}">Verlauf</button>
-                  <button class="secondary small" data-delete="${r.uid}" data-name="${r.username || r.uid}">Eintrag entfernen</button>
+                  <button class="secondary small" data-delete="${r.uid}" data-name="${r.username || "unbekannt"}">Eintrag entfernen</button>
                 </td>
               </tr>
               <tr class="history-row" id="history-row-${r.uid}" style="display:none">
-                <td colspan="6"><div class="history-content" id="history-content-${r.uid}"></div></td>
+                <td colspan="7"><div class="history-content" id="history-content-${r.uid}"></div></td>
               </tr>
             `
               )
@@ -304,6 +306,18 @@ function wireRosterActions() {
       const currentlyDisabled = btn.dataset.disabled === "true";
       btn.disabled = true;
       await Game.Scores.setDisabled(uid, !currentlyDisabled);
+      refreshRoster();
+    });
+  });
+
+  appEl.querySelectorAll("[data-edit-course]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const uid = btn.dataset.editCourse;
+      const current = btn.dataset.current;
+      const next = prompt("Kurs für dieses Konto:", current);
+      if (next === null || next.trim() === current) return;
+      btn.disabled = true;
+      await Game.Scores.setCourse(uid, next.trim());
       refreshRoster();
     });
   });
