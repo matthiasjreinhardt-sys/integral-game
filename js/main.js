@@ -90,6 +90,12 @@ function renderLogin() {
 function renderStart() {
   const modules = Object.values(Game.modules);
   appEl.innerHTML = `
+    <div class="admin-panel my-score-panel">
+      <p class="my-score-label">Deine aktuelle Punktzahl</p>
+      <div class="big-score">${Game.state.sessionCorrect}</div>
+      <p class="my-score-hint">richtige Antworten insgesamt</p>
+    </div>
+
     <div class="nickname-row">
       <form id="nickname-form" class="nickname-form">
         <label>Anzeigename für die Bestenliste

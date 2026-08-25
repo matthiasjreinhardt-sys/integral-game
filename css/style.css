@@ -144,6 +144,26 @@ main#app {
   background: rgba(59, 130, 246, 0.15);
 }
 
+.my-score-panel {
+  text-align: center;
+}
+
+.my-score-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.my-score-panel .big-score {
+  margin: 6px 0;
+}
+
+.my-score-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
 /* ---- Start screen / module cards ---- */
 
 .module-grid {
