@@ -77,6 +77,7 @@ function renderDashboard() {
         <p class="create-result-warning">⚠️ Diese Passwörter werden nur jetzt einmal angezeigt und danach nirgends mehr gespeichert. Jetzt kopieren!</p>
         <pre class="create-result" id="create-result"></pre>
         <button type="button" class="secondary" id="copy-result-btn">In Zwischenablage kopieren</button>
+        <button type="button" class="secondary" id="print-result-btn">🖨️ Als PDF / drucken</button>
       </div>
     </div>
 
@@ -216,6 +217,13 @@ function wireCreateForm() {
   const resultBox = document.getElementById("create-result-box");
   const resultEl = document.getElementById("create-result");
   const copyBtn = document.getElementById("copy-result-btn");
+  const printBtn = document.getElementById("print-result-btn");
+  let lastCreated = [];
+  let lastCourse = "";
+
+  printBtn.addEventListener("click", () => {
+    printAccountCards(lastCourse, lastCreated);
+  });
 
   copyBtn.addEventListener("click", async () => {
     try {
@@ -257,6 +265,8 @@ function wireCreateForm() {
       statusEl.textContent = `Fertig: ${created.length} Konten erzeugt.`;
       resultEl.textContent =
         `Kurs: ${course}\n\n` + created.map((a) => `${a.username}\t${a.password}`).join("\n");
+      lastCreated = created;
+      lastCourse = course;
       copyBtn.textContent = "In Zwischenablage kopieren";
       resultBox.style.display = "block";
       resultBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -270,6 +280,30 @@ function wireCreateForm() {
       submitBtn.disabled = false;
     }
   });
+}
+
+// Baut eine Kartenansicht (Kurs, Benutzername, Passwort) in #print-area und
+// oeffnet den Browser-Druckdialog. Dort kann als Ziel "Als PDF speichern"
+// gewaehlt werden - kein zusaetzliches Tool noetig. Die gestrichelten Linien
+// zwischen den Karten markieren die Schnittkanten zum Ausschneiden.
+function printAccountCards(course, accounts) {
+  const printArea = document.getElementById("print-area");
+  printArea.innerHTML = `
+    <h2 class="print-title">Zugangsdaten &middot; Kurs ${course}</h2>
+    <div class="print-card-grid">
+      ${accounts
+        .map(
+          (a) => `
+        <div class="print-card">
+          <div class="print-card-course">Kurs ${course}</div>
+          <div class="print-card-row"><span>Benutzername</span><span>${a.username}</span></div>
+          <div class="print-card-row"><span>Passwort</span><span>${a.password}</span></div>
+        </div>`
+        )
+        .join("")}
+    </div>
+  `;
+  window.print();
 }
 
 // Legt ein einzelnes Konto ueber eine zweite, isolierte Firebase-App-Instanz

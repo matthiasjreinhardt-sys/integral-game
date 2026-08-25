@@ -534,3 +534,72 @@ button.small {
   flex-direction: column;
   gap: 4px;
 }
+
+/* ---- Druckansicht: Zugangsdaten-Karten zum Ausschneiden ---- */
+
+#print-area {
+  display: none;
+}
+
+.print-title {
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  margin: 0 0 12px;
+  color: #000;
+}
+
+.print-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.print-card {
+  border: 1px dashed #888;
+  padding: 14px 18px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color: #000;
+  background: #fff;
+}
+
+.print-card-course {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #555;
+}
+
+.print-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  font-family: "Consolas", "Courier New", monospace;
+}
+
+.print-card-row span:first-child {
+  color: #555;
+  font-size: 11px;
+}
+
+.print-card-row span:last-child {
+  font-size: 15px;
+  font-weight: bold;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
